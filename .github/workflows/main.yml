@@ -1,0 +1,2 @@
+- name: Auto rebase
+  uses: Label305/AutoRebase@v0.1.5
