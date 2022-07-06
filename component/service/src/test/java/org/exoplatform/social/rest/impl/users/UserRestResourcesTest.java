@@ -592,16 +592,17 @@ public class UserRestResourcesTest extends AbstractResourceTest {
     startSessionAs("root");
     String email = "root@test.com";
     byte[] formData = ("name=email&value=" + email).getBytes();
+    byte[] formDataDefaultBanner = ("name=banner&value=DEFAULT_BANNER").getBytes();
     MultivaluedMap<String, String> headers = new MultivaluedMapImpl();
     headers.putSingle("Content-Type", "application/x-www-form-urlencoded");
     ContainerResponse response = service("PATCH", getURLResource("users/root/"), "", headers, formData);
+    ContainerResponse responseDefaultBanner = service("PATCH", getURLResource("users/root/"), "", headers, formDataDefaultBanner);
     assertNotNull(response);
     assertEquals(String.valueOf(response.getEntity()), 204, response.getStatus());
 
     Identity identity = identityManager.getOrCreateIdentity(OrganizationIdentityProvider.NAME, "root");
     assertNotNull(identity);
     assertEquals(email, identity.getProfile().getEmail());
-
     response = service("PATCH", getURLResource("users/john/"), "", headers, formData);
     assertNotNull(response);
     assertEquals("User root shouldn't be able to modify john attributes", 401, response.getStatus());

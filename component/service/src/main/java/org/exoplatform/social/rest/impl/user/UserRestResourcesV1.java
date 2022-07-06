@@ -716,14 +716,21 @@ public class UserRestResourcesV1 implements UserRestResources, Startable {
           return Response.status(Response.Status.UNAUTHORIZED).entity("EMAIL:ALREADY_EXISTS").build();
         }
       }
-      updateProfileField(profile, fieldName, value, true);
+      if (value.equals("DEFAULT_BANNER")) {
+        profile.setListUpdateTypes(Arrays.asList(UpdateType.BANNER));
+        profile.setBannerUrl("DEFAULT_BANNER");
+        profile.removeProperty(name);
+        identityManager.updateProfile(profile, true);
+      } else{
+        updateProfileField(profile, fieldName, value, true);
+      }
     } catch (IllegalAccessException e) {
       LOG.error("User {} is not allowed to update attribute {}", currentUser, name);
       return Response.status(Status.UNAUTHORIZED).build();
     } catch (IdentityStorageException e) {
       return Response.serverError().entity(e.getMessageKey()).build();
     } catch (Exception e) {
-      return Response.serverError().entity("Can't update avatar, error = " + e.getMessage()).build();
+      return Response.serverError().entity("Can't update Banner, error = " + e.getMessage()).build();
     }
     return Response.noContent().build();
   }
@@ -1611,12 +1618,12 @@ public class UserRestResourcesV1 implements UserRestResources, Startable {
                                             System.currentTimeMillis());
           profile.setListUpdateTypes(Arrays.asList(UpdateType.AVATAR));
         } else {
-          attachment = new BannerAttachment(null,
-                                            uploadResource.getFileName(),
-                                            uploadResource.getMimeType(),
-                                            inputStream,
-                                            System.currentTimeMillis());
-          profile.setListUpdateTypes(Arrays.asList(UpdateType.BANNER));
+            attachment = new BannerAttachment(null,
+                    uploadResource.getFileName(),
+                    uploadResource.getMimeType(),
+                    inputStream,
+                    System.currentTimeMillis());
+            profile.setListUpdateTypes(Arrays.asList(UpdateType.BANNER));
         }
         profile.setProperty(name, attachment);
         if (save) {
